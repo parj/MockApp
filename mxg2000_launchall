@@ -1,0 +1,57 @@
+#	mxg2000_launchall
+#	Launches application
+#	Version: 1.1
+#	Revision History:
+#	Comments			Author		Date
+#	Created v1			pm			2010-Dec-23
+#	Added in variables	pm			2012-Aug-14
+
+
+DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+LOGS="$DIR/logs"
+APP="$DIR/MyDaemon.py"
+PID="$LOGS/mydaemon.pid"
+
+function helpLaunchall {
+	echo "Commands are start and stop";	
+	echo "Directory of Script is "$DIR;
+	echo "Current OS is `uname -a`";
+}
+
+case "$1" in
+start)
+	echo "start";
+	if [ ! -d $LOGS ]; then
+		mkdir $LOGS
+	fi
+	python $APP start `pwd`;
+	sleep 2;
+	$DIR/launchmxj.app
+;;
+stop)
+	echo "Stopping `cat $PID`";
+
+	python $APP stop `pwd`;
+
+	if [ -e $PID ]; then
+		ps -ef | grep -f $PID | grep -v grep | awk {'print $2'} | xargs kill;
+		rm $PID;
+	fi
+	$DIR/launchmxj.app
+;;
+clean)
+	echo "Force clean MockApp. Found the following - "
+	ps -ef | grep -i "MockApp/MyDaemon" | grep -v grep
+	ps -ef | grep -i "MockApp/MyDaemon" | grep -v grep | awk {'print $2'} | xargs kill -9
+	
+	if [ -e $PID ]; then
+		rm $PID;
+	fi
+	$DIR/launchmxj.app
+;;
+*)
+	helpLaunchall;
+;;
+esac
+
+
